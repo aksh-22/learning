@@ -1,0 +1,1 @@
+it is basically extends property of class where we exteds the properties of class with other classes so it won't create multiple instances in the memory
