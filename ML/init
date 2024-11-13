@@ -1,1 +1,6 @@
-
+1. View the data
+2. Look the target
+3. Scale the data
+4. Balance the data
+5. Extract the data (train | test | validation)
+6. Apply qlgo ( KNN )
