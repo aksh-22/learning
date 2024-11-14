@@ -1,6 +1,16 @@
+Data Processing ->
+
 1. View the data
 2. Look the target
-3. Scale the data
-4. Balance the data
-5. Extract the data (train | test | validation)
-6. Apply qlgo ( KNN )
+3. Balance the data ( look if any data is missing)
+4. Scale the data
+5. Scaling of data -> two type of scaling
+    a. Normalization - 
+                      formula -  X' = ( X - Xmin ) / ( Xmax - Xmin ) 
+                      logic -    values between 0 and 1
+                      
+    b. standardization -
+                      formula -  X' = ( X - mu ) / sd
+                      logic -    values between -3 and +3
+6. Extract the data (train | test | validation)                      
+7. Apply algo ( KNN )
