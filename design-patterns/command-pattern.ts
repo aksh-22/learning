@@ -95,3 +95,9 @@ class AddThenMultiplyCommand {
     return this.addCommand.undo(newValue);
   }
 }
+
+const calculator = new Calculator();
+calculator.executeCommand(new AddThenMultiplyCommand(2, 10));
+console.log(calculator.value);
+calculator.undo();
+console.log(calculator.value);
