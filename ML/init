@@ -1,8 +1,11 @@
 Data Processing ->
 
 1. View the data
-2. Look the target
+2. Select the target and features
 3. Balance the data ( look if any data is missing)
+4. Encoding data
+    a. Categorical data
+    b. Dependent Variable
 4. Scale the data
 5. Scaling of data -> two type of scaling
     a. Normalization - 
