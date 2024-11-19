@@ -6,8 +6,9 @@ Data Processing ->
 4. Encoding data
     a. Categorical data
     b. Dependent Variable
-4. Scale the data
-5. Scaling of data -> two type of scaling
+5. Split the data (train | test | validation)                      
+6. Scale the data
+7. Scaling of data -> two type of scaling
     a. Normalization - 
                       formula -  X' = ( X - Xmin ) / ( Xmax - Xmin ) 
                       logic -    values between 0 and 1
@@ -15,5 +16,7 @@ Data Processing ->
     b. standardization -
                       formula -  X' = ( X - mu ) / sd
                       logic -    values between -3 and +3
-6. Extract the data (train | test | validation)                      
-7. Apply algo ( KNN )
+    c. which one to choose!?
+    d. when to scale before or after splitting
+    e. Fit transform and transform difference
+8. Apply algo ( KNN )
