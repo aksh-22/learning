@@ -1,0 +1,15 @@
+Type of architecture
+
+1. MVC ( model view controller)
+2. MVP
+3. MVVM
+4. MVVM-C
+5. VIPER
+
+V -> View -> responsible for UI
+M -> Model -> responsible for business logic | data ( how data is stored and manipulated)
+
+Translator -> 
+    a) Controller
+    b) Presenter
+    c) View-Model
