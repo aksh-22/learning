@@ -1,0 +1,7 @@
+- add a debugger file
+- add a break point
+  - step-over -> to move next step
+  - step in -> to get into a function
+  - step over -> to get out of function
+- can add expressions for debugger to stop at particular condition
+- can change variables
