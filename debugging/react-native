@@ -1,0 +1,3 @@
+- install react-native-tools extensions
+- create json file for it ( to do so select react-native while selecting it)
+  - select "attach to packager"
