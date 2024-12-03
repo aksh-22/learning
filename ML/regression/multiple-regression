@@ -3,5 +3,36 @@ building methods
 1. All-in
 2. Backward Elimination
 3. Forward Selection
-4. Bidirectional Selection
+4. Bidirectional Selection ( Step-wise regression )
 5. Score comparison
+
+
+1. All-in -> 
+  - prior knowledge ( for which columns to select )
+  - Have to use ( based on business requirement we have to choose these columns )
+  - Preparing for backward elimination.
+
+2. Backward Elimination -> 
+  a) select a significance level ( initial  SL = 0.5 )
+  b) choose all the columns
+  c) consider the predictor with the highest P-value.
+      if- P > SL --> step D
+      else       --> Go to final
+  d) remove the predictor
+  e) choose all columns except this variable
+
+3. Forward Selection ->
+  a) select a significance level ( initial  SL = 0.5 )
+  b) fit all simple regression models y ~ Xn , select the one with lowest p value
+  c) keep this variable and fit all possible model with one extra predictor added to the one(s) you already have
+  d) consider the predictor with the lowest p value. 
+      if P < SL --> go to step 3
+      else      --> Go to final ( keep the previous model )
+
+4. Bidirectional Selection ->
+  a) select a significance level to stay and enter 
+      SLENTER = 0.05 | SLSTAY = 0.05
+  b) perform next step of Forward selection ( new variable must have P < SLENTER to enter)
+  c) perform All step of Backward selection ( new variable must have P < SLSTAY to stay)
+  d) No new variable can enter and no old variable can exit
+      -> Finish
