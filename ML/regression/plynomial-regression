@@ -1,0 +1,75 @@
+Building Methods for Polynomial Regression
+
+1. All-in
+2. Backward Elimination
+3. Forward Selection
+4. Bidirectional Selection (Step-wise Regression)
+5. Degree Optimization
+
+6. All-in
+
+-   When to Use:
+
+    -   You have prior knowledge about which features are important.
+    -   Business requirements demand keeping specific features or degrees in the model.
+    -   This is often the starting point before refinement.
+
+-   Steps:
+    1. Choose the polynomial degree (e.g., degree = 4).
+    2. Transform X into polynomial features using PolynomialFeatures.
+    3. Fit the regression model using the transformed X.
+    4. Evaluate the overall fit without removing any terms.
+
+2. Backward Elimination
+
+-   When to Use:
+
+    -   To iteratively refine the model by removing terms with low significance (high P-value).
+    -   Helps simplify the model by removing unnecessary terms.
+
+-   Steps:
+    a) Set a significance level (SL, e.g., SL = 0.05).
+    b) Start with the full polynomial model (e.g., degree = 4, includes X, X^2, X^3, X^4).
+    c) Evaluate the P-value for each term (including the intercept).
+    d) Identify the term with the highest P-value: - If P > SL, remove the term and refit the model. - If no P > SL, stop and keep the current model.
+    e) Repeat steps c–d until all remaining terms have P < SL.
+
+3. Forward Selection
+
+-   When to Use:
+
+    -   To build the model incrementally, starting with no terms.
+    -   Useful when you don’t know which polynomial terms to include.
+
+-   Steps:
+    a) Set a significance level (SL, e.g., SL = 0.05).
+    b) Start with no polynomial terms (just the intercept).
+    c) Add terms incrementally: - Fit simple regression models for y using each term (X, X^2, X^3, …). - Select the term with the lowest P-value.
+    d) If P < SL, keep the term and repeat step c with one additional term.
+    e) Stop when no additional terms have P < SL.
+
+4. Bidirectional Selection (Step-wise Regression)
+
+-   When to Use:
+
+    -   To combine Forward and Backward approaches for a balanced model-building strategy.
+
+-   Steps:
+    a) Set significance levels (SL_ENTER and SL_STAY, e.g., SL_ENTER = 0.05, SL_STAY = 0.05).
+    b) Perform the next step of Forward Selection (new variable must have P < SL_ENTER to enter).
+    c) Perform all steps of Backward Elimination (existing variables must have P < SL_STAY to stay).
+    d) Repeat steps b–c until no new variable can enter and no existing variable can exit.
+
+5. Degree Optimization
+
+-   When to Use:
+
+    -   To select the best polynomial degree for the regression model.
+    -   Prevents overfitting by choosing an optimal degree.
+
+-   Steps:
+    a) Define a range of polynomial degrees to test (e.g., 1 to 6).
+    b) For each degree: - Transform X using PolynomialFeatures. - Fit the regression model and evaluate performance (e.g., R^2 score or MSE).
+    c) Compare performance metrics across degrees.
+    d) Select the degree that provides the best balance of accuracy and simplicity (e.g., highest R^2 on test data).
+    """
