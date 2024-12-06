@@ -1,0 +1,109 @@
+### Concurrency & Parallelism Notes
+
+#### 1. What is Concurrency?
+
+- Concurrency is about **dealing with multiple tasks at the same time**, but not necessarily simultaneously.
+- Example: In JavaScript, async programming allows tasks to progress without waiting for others to complete.
+
+#### 2. What is Parallelism?
+
+- Parallelism is about **executing multiple tasks simultaneously**, often using multi-threading or multiple processes.
+- Example: Using worker threads in Node.js to process data in parallel.
+
+#### 3. Key Differences
+
+| **Feature**   | **Concurrency**                                         | **Parallelism**                                   |
+| ------------- | ------------------------------------------------------- | ------------------------------------------------- |
+| **Execution** | Tasks may overlap but not necessarily at the same time. | Tasks run simultaneously across threads or cores. |
+| **Goal**      | Manage multiple tasks efficiently.                      | Speed up execution by dividing work.              |
+| **Example**   | Async/await, Event Loop in Node.js.                     | Multi-threading, Worker Threads.                  |
+
+#### 4. Why It’s Important in Projects?
+
+- **Improved Efficiency**: Handle multiple tasks efficiently (e.g., API calls, file I/O).
+- **Scalable Systems**: Manage state and synchronization effectively to handle large workloads.
+- **Responsive UI**: In frontend apps, concurrency ensures UI remains responsive during background tasks.
+
+---
+
+#### 5. Using `Promise.all` vs. RxJS `forkJoin`
+
+##### `Promise.all`
+
+- Executes multiple promises concurrently and resolves when all are successful.
+- **Failure Behavior**: If any promise fails, the entire operation fails.
+- Example:
+
+```typescript
+async function fetchDashboardData() {
+  const [users, orders] = await Promise.all([
+    axios.get("/api/users"),
+    axios.get("/api/orders"),
+  ]);
+  console.log({ users: users.data, orders: orders.data });
+}
+```
+
+##### RxJS `forkJoin`
+
+- Similar to `Promise.all` but built for observables. Emits combined results when all observables complete.
+- **Failure Behavior**: By default, if any observable fails, the operation fails.
+- Example:
+
+```typescript
+import { forkJoin, from } from "rxjs";
+import { map } from "rxjs/operators";
+
+const fetchUsers = () => from(axios.get("/api/users"));
+const fetchOrders = () => from(axios.get("/api/orders"));
+
+forkJoin([fetchUsers(), fetchOrders()])
+  .pipe(
+    map(([users, orders]) => ({
+      users: users.data,
+      orders: orders.data,
+    }))
+  )
+  .subscribe(console.log);
+```
+
+---
+
+#### 6. Handling Partial Success in RxJS
+
+Use `catchError` to ensure successful tasks are delivered even if one fails.
+
+```typescript
+import { forkJoin, from, of } from "rxjs";
+import { map, catchError } from "rxjs/operators";
+
+const fetchUsers = () =>
+  from(axios.get("/api/users")).pipe(catchError(() => of({ data: [] })));
+const fetchOrders = () =>
+  from(axios.get("/api/orders")).pipe(catchError(() => of({ data: [] })));
+
+forkJoin([fetchUsers(), fetchOrders()])
+  .pipe(
+    map(([users, orders]) => ({
+      users: users.data,
+      orders: orders.data,
+    }))
+  )
+  .subscribe(console.log);
+```
+
+---
+
+#### 7. Enhanced RxJS Features
+
+- **Retry Logic**: Automatically retry failed tasks using the `retry` operator.
+- **Real-Time Updates**: Combine streams of data for real-time dashboards.
+- **Error Recovery**: Use `catchError` to recover from failures for each task.
+
+---
+
+#### 8. Practical Use Cases
+
+- **Frontend**: Ensure UI responsiveness while fetching multiple API endpoints.
+- **Backend**: Process large workloads in parallel (e.g., file uploads, report generation).
+- **Real-Time Apps**: Combine real-time streams for dashboards or notifications.
