@@ -20,3 +20,8 @@ Data Processing ->
     d. when to scale before or after splitting
     e. Fit transform and transform difference
 8. Apply algo ( KNN )
+
+queries :-
+- when to use what regression
+- when to use what kernel in SVR
+- when to scale training data and when to train complete data
