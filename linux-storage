@@ -1,0 +1,263 @@
+# 📃 Image Sync Automation - Setup & Deployment Guide
+
+## 🌟 Purpose
+
+Automate image file syncing from multiple Windows network shares to a central Windows share using an Ubuntu server. Only `.jpg`, `.png`, and `.webp` files are copied. Script logs and rotates logs automatically.
+
+---
+
+## 🔧 What This Setup Includes
+
+- Mounting SMB shares (source/destination)
+- Secure credential management
+- `rsync` based file transfer with count logging
+- Cron-based automation (hourly)
+- Persistent logging with rotation
+
+---
+
+## 📂 Source & Destination
+
+### Source Server (192.168.15.10):
+
+- `\\192.168.15.10\Custom Review_RND&DND\CAD File\NEW\CHANDRAKANT`
+- `\\192.168.15.10\Custom Review_RND&DND\CAD File\NEW\MAHESH`
+- `\\192.168.15.10\Custom Review_RND&DND\CAD File\NEW\Shweta`
+- `\\192.168.15.10\Custom Review_RND&DND\D&D`
+- `\\192.168.15.10\R&D SHADE CARDS\01-02-2025`
+- `\\192.168.15.10\D&D SHADE CARDS\Shade Card`
+
+### Destination Server (192.168.0.11):
+
+- `\\192.168.0.11\JR-Warehouse\photo_folder\carpet-inspection\images\cad`
+- `\\192.168.0.11\JR-Warehouse\photo_folder\carpet-inspection\images\shade-card`
+
+---
+
+## 📁 Mount Points
+
+```bash
+/mnt/source-share              # Source share mount
+/mnt/windows-storage           # Destination mount (already mounted)
+```
+
+---
+
+## 🔐 SMB Credentials
+
+Create file:
+
+```bash
+sudo nano /etc/smb-creds-source
+```
+
+With:
+
+```
+username=your_username
+password=your_password
+domain=WORKGROUP  # optional
+```
+
+Permissions:
+
+```bash
+sudo chmod 600 /etc/smb-creds-source
+```
+
+---
+
+## 💾 Script Path & Usage
+
+### Script location:
+
+```bash
+/home/akash/copy-images.sh
+```
+
+### Make it executable:
+
+```bash
+chmod +x /home/akash/copy-images.sh
+```
+
+### Manual test:
+
+```bash
+bash /home/akash/copy-images.sh
+```
+
+### ✨ Final Script Code:
+
+```bash
+#!/bin/bash
+
+# === CONFIG ===
+LOG_FILE="/var/log/image-copy/image-copy.log"
+TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+
+# === LOGGING ===
+log() {
+  echo "[$TIMESTAMP] $1" | tee -a "$LOG_FILE"
+}
+
+copy_and_log() {
+  local source="$1"
+  local dest="$2"
+  local label="$3"
+
+  log "----- [$label] Sync Started -----"
+  log "Source: $source"
+  log "Destination: $dest"
+
+  # Count matching image files
+  FILE_COUNT=$(find "$source" -type f \( -iname "*.jpg" -o -iname "*.png" -o -iname "*.webp" \) 2>/dev/null | wc -l)
+
+  # Rsync and log output
+  RSYNC_OUTPUT=$(rsync -av --include='*/' \
+    --include='*.jpg' --include='*.png' --include='*.webp' --exclude='*' \
+    "$source/" "$dest/" 2>&1 | tee -a "$LOG_FILE")
+
+  # Count copied files from rsync output
+  COPIED_COUNT=$(echo "$RSYNC_OUTPUT" | grep -v '/$' | grep -c '^>f')
+
+  log "Found: $FILE_COUNT image(s)"
+  log "Copied: $COPIED_COUNT new/changed image(s)"
+  log "----- [$label] Sync Completed -----"
+  echo "" | tee -a "$LOG_FILE"
+}
+
+# === PREP: Ensure log directory exists ===
+mkdir -p "$(dirname "$LOG_FILE")"
+
+# === MOUNT SOURCE SHARE (if not already mounted) ===
+if ! mountpoint -q /mnt/source-share; then
+  log "Mounting source share..."
+  sudo mount -t cifs "//192.168.15.10/Custom Review_RND&DND" /mnt/source-share \
+    -o credentials=/etc/smb-creds-source,uid=$(id -u),gid=$(id -g),iocharset=utf8
+fi
+
+# === COPY CAD FILES ===
+for dir in "CHANDRAKANT" "MAHESH" "Shweta"; do
+  copy_and_log "/mnt/source-share/CAD File/NEW/$dir" \
+               "/mnt/windows-storage/photo_folder/carpet-inspection/images/cad" \
+               "CAD - $dir"
+done
+
+copy_and_log "/mnt/source-share/D&D" \
+             "/mnt/windows-storage/photo_folder/carpet-inspection/images/cad" \
+             "CAD - D&D"
+
+# === COPY SHADE CARD FILES ===
+copy_and_log "/mnt/source-share/R&D SHADE CARDS/01-02-2025" \
+             "/mnt/windows-storage/photo_folder/carpet-inspection/images/shade-card" \
+             "SHADE CARD - 01-02-2025"
+
+copy_and_log "/mnt/source-share/D&D SHADE CARDS/Shade Card" \
+             "/mnt/windows-storage/photo_folder/carpet-inspection/images/shade-card" \
+             "SHADE CARD - D&D"
+
+log "✅ Full sync completed."
+```
+
+---
+
+## 📊 Logging Setup
+
+### Path:
+
+```bash
+/var/log/image-copy/image-copy.log
+```
+
+### Create log directory:
+
+```bash
+sudo mkdir -p /var/log/image-copy
+sudo chown $USER:$USER /var/log/image-copy
+```
+
+### View logs:
+
+```bash
+cat /var/log/image-copy/image-copy.log
+```
+
+### Tail logs:
+
+```bash
+tail -f /var/log/image-copy/image-copy.log
+```
+
+---
+
+## 🔄 Logrotate Setup (30 Days)
+
+### Create config:
+
+```bash
+sudo nano /etc/logrotate.d/image-copy
+```
+
+Paste:
+
+```
+/var/log/image-copy/image-copy.log {
+    daily
+    rotate 30
+    missingok
+    notifempty
+    compress
+    delaycompress
+    copytruncate
+}
+```
+
+Test it:
+
+```bash
+sudo logrotate -f /etc/logrotate.d/image-copy
+```
+
+---
+
+## ⏱️ Cron Job Setup
+
+### Schedule (every hour from 8 AM to 10 PM):
+
+```bash
+crontab -e
+```
+
+Add:
+
+```bash
+0 8-22 * * * /bin/bash /home/akash/copy-images.sh
+```
+
+### Confirm:
+
+```bash
+crontab -l
+```
+
+---
+
+## 📊 Daily Use
+
+- Script will auto-run via cron hourly
+- Logs will accumulate at `/var/log/image-copy/image-copy.log`
+- Old logs rotate daily and are kept for 30 days
+
+---
+
+## 🔹 Extras (Optional Enhancements)
+
+- Add dry-run mode
+- Email on error
+- Push log summary to Slack or Webhook
+- File checksum verification
+
+---
+
+You're ready to replicate this setup on any Linux system. Just follow this guide step-by-step. 🚀
